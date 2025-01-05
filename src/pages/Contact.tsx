@@ -1,131 +1,120 @@
-import React, { useState } from 'react';
-import { PageContainer } from '../components/shared/PageContainer';
-import { Button } from '../components/shared/Button';
-import { Mail, MessageSquare, Clock } from 'lucide-react';
-import { useContact } from '../hooks/useContact';
+import { useState } from 'react';
+import { supabase } from '../lib/supabase';
 
 export function Contact() {
-  const { submitContact, loading, error } = useContact();
   const [formData, setFormData] = useState({
     name: '',
     email: '',
-    message: ''
+    message: '',
   });
-  const [success, setSuccess] = useState(false);
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    const result = await submitContact(formData);
-    if (result) {
-      setSuccess(true);
-      setFormData({ name: '', email: '', message: '' });
-    }
-  };
+  const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const { name, value } = e.target;
     setFormData(prev => ({
       ...prev,
-      [e.target.name]: e.target.value
+      [name]: value
     }));
   };
 
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setStatus('loading');
+
+    try {
+      const { error } = await supabase
+        .from('contacts')
+        .insert([formData]);
+
+      if (error) throw error;
+
+      setStatus('success');
+      setFormData({ name: '', email: '', message: '' });
+    } catch (error) {
+      console.error('Error submitting form:', error);
+      setStatus('error');
+    }
+  };
+
   return (
-    <PageContainer>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
-        <div>
-          <h1 className="text-4xl md:text-5xl font-bold text-white mb-6">Get in Touch</h1>
-          <p className="text-[#CCCCCC] text-lg mb-8">
-            Have a great idea? We'd love to hear about it. Reach out to us and let's make it happen.
-          </p>
-
-          <div className="space-y-6">
-            <div className="flex items-start space-x-4">
-              <Mail className="w-6 h-6 text-[#6D5DFB] mt-1" />
-              <div>
-                <h3 className="text-white font-semibold">Email Us</h3>
-                <p className="text-[#CCCCCC]">contact@venturex.com</p>
-              </div>
-            </div>
-            <div className="flex items-start space-x-4">
-              <MessageSquare className="w-6 h-6 text-[#6D5DFB] mt-1" />
-              <div>
-                <h3 className="text-white font-semibold">Chat With Us</h3>
-                <p className="text-[#CCCCCC]">Available on Discord</p>
-              </div>
-            </div>
-            <div className="flex items-start space-x-4">
-              <Clock className="w-6 h-6 text-[#6D5DFB] mt-1" />
-              <div>
-                <h3 className="text-white font-semibold">Response Time</h3>
-                <p className="text-[#CCCCCC]">Within 24 hours</p>
-              </div>
-            </div>
+    <section className="py-20 bg-black">
+      <div className="container mx-auto px-4">
+        <div className="max-w-3xl mx-auto">
+          <div className="text-center mb-16">
+            <h2 className="text-4xl font-bold text-white mb-4">Get in Touch</h2>
+            <p className="text-xl text-gray-400">
+              Have a project in mind? Let's discuss how we can help bring your vision to life.
+            </p>
           </div>
-        </div>
 
-        <div className="bg-white/5 backdrop-blur-lg rounded-xl p-8">
-          {success ? (
-            <div className="text-center py-8">
-              <h3 className="text-2xl font-bold text-white mb-4">Thank You!</h3>
-              <p className="text-[#CCCCCC]">We'll get back to you soon.</p>
+          <form onSubmit={handleSubmit} className="space-y-6">
+            <div>
+              <label htmlFor="name" className="block text-sm font-medium text-white mb-2">
+                Name
+              </label>
+              <input
+                type="text"
+                id="name"
+                name="name"
+                value={formData.name}
+                onChange={handleChange}
+                required
+                className="w-full px-4 py-3 rounded-lg bg-white/5 border border-white/10 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#6D5DFB] focus:border-transparent transition-colors"
+                placeholder="Your name"
+              />
             </div>
-          ) : (
-            <form onSubmit={handleSubmit} className="space-y-6">
-              {error && (
-                <div className="bg-red-500/10 border border-red-500/50 text-red-500 p-4 rounded-lg">
-                  {error}
-                </div>
-              )}
-              <div>
-                <label htmlFor="name" className="block text-white mb-2">Name</label>
-                <input
-                  type="text"
-                  id="name"
-                  name="name"
-                  value={formData.name}
-                  onChange={handleChange}
-                  className="w-full px-4 py-2 rounded-lg bg-white/10 border border-white/20 text-white focus:outline-none focus:border-[#6D5DFB]"
-                  placeholder="Your name"
-                  required
-                />
-              </div>
-              <div>
-                <label htmlFor="email" className="block text-white mb-2">Email</label>
-                <input
-                  type="email"
-                  id="email"
-                  name="email"
-                  value={formData.email}
-                  onChange={handleChange}
-                  className="w-full px-4 py-2 rounded-lg bg-white/10 border border-white/20 text-white focus:outline-none focus:border-[#6D5DFB]"
-                  placeholder="your@email.com"
-                  required
-                />
-              </div>
-              <div>
-                <label htmlFor="message" className="block text-white mb-2">Message</label>
-                <textarea
-                  id="message"
-                  name="message"
-                  value={formData.message}
-                  onChange={handleChange}
-                  className="w-full px-4 py-2 rounded-lg bg-white/10 border border-white/20 text-white focus:outline-none focus:border-[#6D5DFB] h-32"
-                  placeholder="Tell us about your project"
-                  required
-                ></textarea>
-              </div>
-              <Button
-                variant="primary"
-                className="w-full"
-                onClick={handleSubmit}
-                disabled={loading}
+
+            <div>
+              <label htmlFor="email" className="block text-sm font-medium text-white mb-2">
+                Email
+              </label>
+              <input
+                type="email"
+                id="email"
+                name="email"
+                value={formData.email}
+                onChange={handleChange}
+                required
+                className="w-full px-4 py-3 rounded-lg bg-white/5 border border-white/10 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#6D5DFB] focus:border-transparent transition-colors"
+                placeholder="your@email.com"
+              />
+            </div>
+
+            <div>
+              <label htmlFor="message" className="block text-sm font-medium text-white mb-2">
+                Message
+              </label>
+              <textarea
+                id="message"
+                name="message"
+                value={formData.message}
+                onChange={handleChange}
+                required
+                rows={6}
+                className="w-full px-4 py-3 rounded-lg bg-white/5 border border-white/10 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#6D5DFB] focus:border-transparent transition-colors resize-none"
+                placeholder="Tell us about your project..."
+              />
+            </div>
+
+            <div className="text-center">
+              <button
+                type="submit"
+                disabled={status === 'loading'}
+                className="bg-gradient-to-r from-[#6D5DFB] to-[#FF6EC7] text-white px-8 py-3 rounded-full hover:shadow-[0_0_30px_rgba(109,93,251,0.5)] transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                {loading ? 'Sending...' : 'Send Message'}
-              </Button>
-            </form>
-          )}
+                {status === 'loading' ? 'Sending...' : 'Send Message'}
+              </button>
+            </div>
+
+            {status === 'success' && (
+              <p className="text-green-500 text-center">Message sent successfully!</p>
+            )}
+            {status === 'error' && (
+              <p className="text-red-500 text-center">Error sending message. Please try again.</p>
+            )}
+          </form>
         </div>
       </div>
-    </PageContainer>
+    </section>
   );
 }
