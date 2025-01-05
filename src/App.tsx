@@ -1,24 +1,40 @@
-import { Toaster } from "@/components/ui/toaster";
-import { Toaster as Sonner } from "@/components/ui/sonner";
-import { TooltipProvider } from "@/components/ui/tooltip";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
-import Index from "./pages/Index";
+import React from 'react';
+import { Header } from './components/Header';
+import { Footer } from './components/Footer';
+import { FloatingNav } from './components/FloatingNav';
+import { Hero } from './components/Hero';
+import { AboutUs } from './pages/AboutUs';
+import { Story } from './pages/Story';
+import { Services } from './pages/Services';
+import { Portfolio } from './pages/Portfolio';
+import { Contact } from './pages/Contact';
 
-const queryClient = new QueryClient();
-
-const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <Toaster />
-      <Sonner />
-      <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<Index />} />
-        </Routes>
-      </BrowserRouter>
-    </TooltipProvider>
-  </QueryClientProvider>
-);
-
-export default App;
+export default function App() {
+  return (
+    <div className="min-h-screen bg-black">
+      <Header />
+      <main>
+        <div id="home">
+          <Hero />
+        </div>
+        <div id="about-us">
+          <AboutUs />
+        </div>
+        <div id="our-story">
+          <Story />
+        </div>
+        <div id="services">
+          <Services />
+        </div>
+        <div id="portfolio">
+          <Portfolio />
+        </div>
+        <div id="contact">
+          <Contact />
+        </div>
+      </main>
+      <Footer />
+      <FloatingNav />
+    </div>
+  );
+}
