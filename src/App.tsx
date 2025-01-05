@@ -6,7 +6,7 @@ import { Hero } from './components/Hero';
 import { AboutUs } from './pages/AboutUs';
 import { Story } from './pages/Story';
 import { Services } from './pages/Services';
-import { Portfolio } from './pages/Portfolio';
+import Portfolio from './pages/Portfolio';
 import { Contact } from './pages/Contact';
 
 export default function App() {

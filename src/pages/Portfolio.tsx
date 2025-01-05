@@ -49,7 +49,6 @@ export default function Portfolio() {
       ],
       impact: "The collaboration with VentureX enabled MediLink to transform their innovative healthcare solution from concept to reality..."
     }
-    // Additional case studies can be added here
   ];
 
   return (
